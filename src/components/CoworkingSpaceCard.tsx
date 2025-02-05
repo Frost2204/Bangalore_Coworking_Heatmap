@@ -118,9 +118,9 @@ const CoworkingSpaceCard: React.FC<CoworkingSpaceCardProps> = ({
               <p>
                 <strong>Price (INR):</strong> {space.price}
               </p>
-              <p>
+              {/* <p>
                 <strong>Area:</strong> {space.area}
-              </p>
+              </p> */}
             </div>
           </SwiperSlide>
         ))}
