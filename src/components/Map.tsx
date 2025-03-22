@@ -6,7 +6,7 @@ import {
   useMap,
 } from "react-leaflet";
 import { DivIcon, LatLngBounds } from "leaflet";
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { coworkingSpaces, CoworkingSpace } from "../data/coworkingSpaces";
 import CoworkingSpaceCard from "./CoworkingSpaceCard";
 import "leaflet/dist/leaflet.css";
@@ -14,12 +14,13 @@ import "swiper/swiper-bundle.css";
 import SearchInput from "./SearchInput";
 import Draggable from "react-draggable";
 
-const MapViewUpdater = ({ position }: { position: [number, number] }) => {
+const MapViewUpdater = ({ bounds }: { bounds: LatLngBounds }) => {
   const map = useMap();
-  map.flyTo(position, map.getZoom(), {
-    duration: 1.5,
-    easeLinearity: 0.25,
-  });
+  useEffect(() => {
+    if (bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [50, 50], duration: 1.5 });
+    }
+  }, [bounds, map]);
   return null;
 };
 
@@ -47,7 +48,15 @@ export default function Map() {
   };
 
   const handleSearchSubmit = () => {
-    console.log("Search submitted");
+    if (filteredSpaces.length === 0) return;
+
+    const bounds = new LatLngBounds(
+      filteredSpaces.map((space) => space.coordinates)
+    );
+
+    if (mapRef.current) {
+      mapRef.current.fitBounds(bounds, { padding: [50, 50] });
+    }
   };
 
   const handleClearSearch = () => {
@@ -131,7 +140,9 @@ export default function Map() {
           );
         })}
 
-        {activeSpaces.length > 0 && <MapViewUpdater position={activeSpaces[0].coordinates} />}
+        {filteredSpaces.length > 0 && (
+          <MapViewUpdater bounds={new LatLngBounds(filteredSpaces.map((space) => space.coordinates))} />
+        )}
       </MapContainer>
 
       {activeSpaces.length > 0 && (
